@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {Button, Card, Col, Container, Form, Pagination, Row} from 'react-bootstrap';
+import {Button, Card, Col, Container, Form, Pagination, Row, Spinner} from 'react-bootstrap';
 import {GetPokemonList} from '../services';
 
 interface PokemonItem {
@@ -13,42 +13,45 @@ interface PaginationProps {
 }
 
 export default function PokemonList() {
+  const [isLoading, setIsLoading] = useState(true);
+
   const [data, setData] = useState<PokemonItem[]>([]);
 
-  const [page, setPage] = useState(1);
+  const [offset, setOffset] = useState(0);
   const [limit, setLimit] = useState(12);
   const [total, setTotal] = useState(0);
-  const [pageOffset, setPageOffset] = useState<PaginationProps>({
+  const [paging, setPaging] = useState<PaginationProps>({
     prev: null,
     next: null,
   });
 
   useEffect(() => {
-    fetchData(0);
-  }, []);
+    fetchData();
+  }, [offset, limit]);
 
-  async function fetchData(offset: number) {
+  async function fetchData() {
+    setIsLoading(true);
     const result = await GetPokemonList(offset, limit);
 
     const next = result.next
       ? parseInt(new URL(result.next).searchParams.get('offset') ?? '0')
       : null;
-    const prev = result.prev
-      ? parseInt(new URL(result.prev).searchParams.get('offset') ?? '0')
+    const prev = result.previous
+      ? parseInt(new URL(result.previous).searchParams.get('offset') ?? '0')
       : null;
 
-    setPageOffset({next, prev});
-    setPage(offset / result.count);
-    setTotal(Math.ceil(result.count / limit));
+    setPaging({next, prev});
+    setTotal(result.count);
     setData(result.results);
+    setIsLoading(false);
   }
 
   function handleClickPrev() {
-    pageOffset.prev && fetchData(pageOffset.prev);
+    typeof paging.prev === 'number' && setOffset(paging.prev);
   }
 
   function handleClickNext() {
-    pageOffset.next && fetchData(pageOffset.next);
+    typeof paging.next === 'number' && setOffset(paging.next);
   }
 
   return (
@@ -63,29 +66,35 @@ export default function PokemonList() {
             <Form.Select onChange={e => setLimit(parseInt(e.target.value))}>
               <option>12</option>
               <option>24</option>
-              <option>36</option>
             </Form.Select>
           </Form.Group>
         </Col>
       </Row>
-      <Row>
-        {data.map(({name, url}) => (
-          <Col md="4" xl="3">
-            <Card className="card-pokemon p-3 mb-5">
-              <Card.Title className="text-capitalize">{name}</Card.Title>
-              <Card.Text>Lorem Ipsum</Card.Text>
-              <Button variant="primary shadow-none">Open Details</Button>
-            </Card>
-          </Col>
-        ))}
-      </Row>
+      {isLoading ? (
+        <Row className="d-flex my-3 justify-content-center">
+          <Spinner animation="border" role="status" />
+        </Row>
+      ) : (
+        <Row>
+          {data.map(({name, url}) => (
+            <Col md="4" xl="3">
+              <Card className="card-pokemon p-3 mb-5">
+                <Card.Title className="text-capitalize">{name}</Card.Title>
+                <Card.Text>Lorem Ipsum</Card.Text>
+                <Button variant="primary shadow-none">Open Details</Button>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      )}
       <Row className="d-flex justify-content-end">
         <Pagination className="d-flex justify-content-end align-items-center">
-          <Pagination.Prev disabled={page === 1} onClick={handleClickPrev} />
+          <Pagination.Prev disabled={offset === 0} onClick={handleClickPrev} />
           <div className="mx-4">
-            Page {page} of {total}
+            Showing {offset + 1} to {offset + limit < total ? offset + limit : total} from {total}{' '}
+            items(s)
           </div>
-          <Pagination.Next disabled={page === total} onClick={handleClickNext} />
+          <Pagination.Next disabled={offset / limit + 1 >= total} onClick={handleClickNext} />
         </Pagination>
       </Row>
     </Container>
