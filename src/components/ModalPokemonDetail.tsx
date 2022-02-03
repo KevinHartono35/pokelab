@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {Accordion, Modal} from 'react-bootstrap';
-import {PokemonItem} from '../containers/PokemonList';
+import {PokemonItem} from '../types';
 import {GetPokemonDetail} from '../services';
 
 interface ModalPokemonDetailProps {

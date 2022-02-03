@@ -1,12 +1,8 @@
 import React, {useState, useEffect} from 'react';
-import {Button, Card, Col, Container, Form, Pagination, Row, Spinner} from 'react-bootstrap';
-import {ModalPokemonDetail} from '../components';
+import {Col, Container, Form, Pagination, Row, Spinner} from 'react-bootstrap';
+import {CardPokemon, ModalPokemonDetail} from '../components';
 import {GetPokemonList} from '../services';
-
-export interface PokemonItem {
-  name: string;
-  url: string;
-}
+import {PokemonItem} from '../types';
 
 interface PaginationProps {
   prev: number | null;
@@ -81,13 +77,7 @@ export default function PokemonList() {
       <Row>
         {data.map(item => (
           <Col md="4" xl="3">
-            <Card className="card-pokemon p-3 mb-5">
-              <Card.Title className="text-capitalize">{item.name}</Card.Title>
-              <Card.Text>Lorem Ipsum</Card.Text>
-              <Button variant="primary" onClick={() => setModalDetail(item)}>
-                Open Details
-              </Button>
-            </Card>
+            <CardPokemon data={item} handleClickDetail={() => setModalDetail(item)} />
           </Col>
         ))}
       </Row>
