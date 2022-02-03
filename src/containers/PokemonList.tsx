@@ -1,8 +1,9 @@
 import React, {useState, useEffect} from 'react';
 import {Button, Card, Col, Container, Form, Pagination, Row, Spinner} from 'react-bootstrap';
+import {ModalPokemonDetail} from '../components';
 import {GetPokemonList} from '../services';
 
-interface PokemonItem {
+export interface PokemonItem {
   name: string;
   url: string;
 }
@@ -10,19 +11,21 @@ interface PokemonItem {
 interface PaginationProps {
   prev: number | null;
   next: number | null;
+  count: number;
 }
 
 export default function PokemonList() {
   const [isLoading, setIsLoading] = useState(true);
+  const [modalDetail, setModalDetail] = useState<PokemonItem>();
 
   const [data, setData] = useState<PokemonItem[]>([]);
 
   const [offset, setOffset] = useState(0);
   const [limit, setLimit] = useState(12);
-  const [total, setTotal] = useState(0);
   const [paging, setPaging] = useState<PaginationProps>({
     prev: null,
     next: null,
+    count: 0,
   });
 
   useEffect(() => {
@@ -40,8 +43,7 @@ export default function PokemonList() {
       ? parseInt(new URL(result.previous).searchParams.get('offset') ?? '0')
       : null;
 
-    setPaging({next, prev});
-    setTotal(result.count);
+    setPaging({next, prev, count: result.count ?? 0});
     setData(result.results);
     setIsLoading(false);
   }
@@ -56,6 +58,7 @@ export default function PokemonList() {
 
   return (
     <Container>
+      <ModalPokemonDetail data={modalDetail} handleHide={() => setModalDetail(undefined)} />
       <Row className="mb-3">
         <h1>Pokemon List</h1>
       </Row>
@@ -70,31 +73,35 @@ export default function PokemonList() {
           </Form.Group>
         </Col>
       </Row>
-      {isLoading ? (
+      {isLoading && (
         <Row className="d-flex my-3 justify-content-center">
           <Spinner animation="border" role="status" />
         </Row>
-      ) : (
-        <Row>
-          {data.map(({name, url}) => (
-            <Col md="4" xl="3">
-              <Card className="card-pokemon p-3 mb-5">
-                <Card.Title className="text-capitalize">{name}</Card.Title>
-                <Card.Text>Lorem Ipsum</Card.Text>
-                <Button variant="primary shadow-none">Open Details</Button>
-              </Card>
-            </Col>
-          ))}
-        </Row>
       )}
+      <Row>
+        {data.map(item => (
+          <Col md="4" xl="3">
+            <Card className="card-pokemon p-3 mb-5">
+              <Card.Title className="text-capitalize">{item.name}</Card.Title>
+              <Card.Text>Lorem Ipsum</Card.Text>
+              <Button variant="primary" onClick={() => setModalDetail(item)}>
+                Open Details
+              </Button>
+            </Card>
+          </Col>
+        ))}
+      </Row>
       <Row className="d-flex justify-content-end">
         <Pagination className="d-flex justify-content-end align-items-center">
           <Pagination.Prev disabled={offset === 0} onClick={handleClickPrev} />
           <div className="mx-4">
-            Showing {offset + 1} to {offset + limit < total ? offset + limit : total} from {total}{' '}
-            items(s)
+            Showing {offset + 1} to {offset + limit < paging.count ? offset + limit : paging.count}{' '}
+            from {paging.count} items(s)
           </div>
-          <Pagination.Next disabled={offset / limit + 1 >= total} onClick={handleClickNext} />
+          <Pagination.Next
+            disabled={offset / limit + 1 >= paging.count}
+            onClick={handleClickNext}
+          />
         </Pagination>
       </Row>
     </Container>

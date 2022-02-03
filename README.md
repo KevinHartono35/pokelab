@@ -6,7 +6,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 # To Do
 
-- [ ] View all pokemon data with pagination
+- [x] View all pokemon data with pagination
 - [ ] View detail of the pokemon
 - [ ] Save favorite pokemon into localstorage/session storage/cookie/etc.
 
