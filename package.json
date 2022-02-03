@@ -2,6 +2,7 @@
   "name": "pokelab",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://KevinHartono35.github.io",
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.1",
     "@testing-library/react": "^12.1.2",
@@ -55,6 +56,7 @@
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-react": "^7.28.0",
     "eslint-plugin-react-hooks": "^4.3.0",
+    "gh-pages": "^3.2.3",
     "node-sass": "^7.0.1",
     "prettier": "^2.5.1",
     "prettier-airbnb-config": "^1.0.0"
